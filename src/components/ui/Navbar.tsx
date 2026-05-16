@@ -15,6 +15,7 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
+    { name: "Home", path: "/" }, // Added Home
     { name: "Portfolio", path: "/portfolio" },
     { name: "Beats", path: "/beats" },
     { name: "Sample Packs", path: "/sample-packs" },
