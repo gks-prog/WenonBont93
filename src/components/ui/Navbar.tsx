@@ -31,7 +31,9 @@ export function Navbar() {
               {link.name}
             </Link>
           ))}
-          <Link href="/login" className="ml-4 text-[10px] tracking-[0.2em] uppercase font-bold text-white px-8 py-3 bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all duration-500 rounded-sm">Account</Link>
+          <Link href="/login" className="ml-4 text-[10px] tracking-[0.2em] uppercase font-bold text-white px-8 py-3 bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all duration-500 rounded-sm">
+            Login/Register
+          </Link>
         </nav>
       </div>
     </header>
