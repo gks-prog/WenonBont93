@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // <-- Next.js 15 requirement: params is a Promise
 ) {
-  const productId = params.id;
+  // Await the params before extracting the ID
+  const resolvedParams = await params;
+  const productId = resolvedParams.id;
+  
   const supabase = await createClient();
 
   // 1. Verify User is Logged In
