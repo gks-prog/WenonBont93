@@ -1,7 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import { loginUser } from "@/app/actions/auth";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Wrapper function satisfies TypeScript by returning void
+  const handleAuth = async (formData: FormData) => {
+    setLoading(true);
+    setError(null);
+    
+    const result = await loginUser(formData);
+    
+    // If the server action returns an error object, capture and display it
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="h-screen w-full flex items-center justify-center bg-[#0a0a0a] px-6 relative overflow-hidden">
       {/* Cinematic Ambient Glow */}
@@ -13,7 +33,14 @@ export default function LoginPage() {
           <h2 className="text-white text-sm tracking-[0.3em] uppercase font-bold">Client Portal</h2>
         </div>
 
-        <form action={loginUser} className="flex flex-col gap-6">
+        <form action={handleAuth} className="flex flex-col gap-6">
+          {/* Error Message Display */}
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] tracking-widest uppercase text-center rounded-lg">
+              {error}
+            </div>
+          )}
+
           <div className="flex flex-col gap-2">
             <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-[0.2em] ml-1">Email Address</label>
             <input 
@@ -39,9 +66,10 @@ export default function LoginPage() {
           
           <button 
             type="submit"
-            className="mt-4 w-full py-5 bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-xl hover:bg-[#7c3aed] hover:text-white transition-all duration-300"
+            disabled={loading}
+            className="mt-4 w-full py-5 bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-xl hover:bg-[#7c3aed] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Authenticate
+            {loading ? "Authenticating..." : "Authenticate"}
           </button>
         </form>
       </div>
