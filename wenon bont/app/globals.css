@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Standard tags removed from @layer base to prevent PostCSS scoping crashes */
+/* Base Reset & Core Styles */
 html {
   scroll-behavior: smooth;
 }
+
 body {
   background-color: #0a0a0a;
   color: #ffffff;
@@ -13,6 +14,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Fluid Typography Utilities */
 @layer utilities {
   .text-fluid-display {
     font-size: clamp(2.5rem, 8vw + 1rem, 7rem);
@@ -31,16 +33,19 @@ body {
     line-height: 1.6;
   }
 
+  /* Adaptive Spacing System */
   .section-padding {
     padding-block: clamp(4rem, 10vh, 10rem);
     padding-inline: clamp(1rem, 5vw, 3rem);
   }
 
+  /* Safe Area Padding for iOS/Android Browsers */
   .safe-p-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
+/* Luxury Minimalist Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
