@@ -1,50 +1,48 @@
-import Link from "next/link";
-import { Marketplace } from "@/components/sections/Marketplace";
-import { Portfolio } from "@/components/sections/Portfolio";
+"use client";
 
-export default function Home() {
+const COURSES = [
+  { id: 1, title: "THE DARK TRAP MASTERCLASS", duration: "4.5 Hours", modules: 12, price: "$99", image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=800" },
+  { id: 2, title: "CINEMATIC SCORING FOR BRANDS", duration: "6 Hours", modules: 18, price: "$149", image: "https://images.unsplash.com/photo-1518814441584-1845fbb1f20d?q=80&w=800" }
+];
+
+export default function CoursesPage() {
   return (
-    <main className="w-full flex flex-col bg-[#0a0a0a]">
-      {/* Cinematic Hero */}
-      <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[#0a0a0a]">
-          <img 
-            src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop" 
-            alt="Studio Environment" 
-            className="w-full h-full object-cover opacity-30 object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-[#0a0a0a]" />
+    <main className="pt-32 pb-20 bg-[#0a0a0a] min-h-screen">
+      <div className="max-w-[1440px] mx-auto px-[clamp(1.5rem,5vw,3rem)]">
+        <div className="mb-20">
+          <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter">SONIC<br/><span className="text-[#a1a1aa]">EDUCATION.</span></h1>
+          <p className="text-[#a1a1aa] mt-6 max-w-xl text-sm leading-relaxed tracking-wide">Learn the exact techniques used to score global commercials and produce chart-topping dark trap anthems.</p>
         </div>
 
-        <div className="relative z-10 w-full max-w-[1440px] px-[clamp(1.5rem,5vw,3rem)] flex flex-col items-center text-center">
-          <span className="text-[#7c3aed] text-xs md:text-sm font-bold tracking-[0.4em] uppercase mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Visionary Audio Architect
-          </span>
-          <h1 className="text-5xl md:text-8xl lg:text-9xl font-bold text-white tracking-tighter leading-[0.85] mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            SONIC <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/20">
-              SUPREMACY.
-            </span>
-          </h1>
-          <p className="max-w-xl text-[#a1a1aa] text-sm md:text-base leading-relaxed tracking-wide mb-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            Award-winning production, dark luxury instrumentation, and cinematic scoring for the next generation of creative artists.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            <Link href="/beats" className="px-10 py-4 bg-white text-black font-bold tracking-widest uppercase text-xs rounded-sm hover:bg-[#7c3aed] hover:text-white transition-colors duration-500 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-              Explore Catalog
-            </Link>
-            <Link href="/portfolio" className="px-10 py-4 bg-transparent border border-white/20 text-white font-bold tracking-widest uppercase text-xs rounded-sm hover:border-white transition-colors duration-500 backdrop-blur-sm">
-              View Projects
-            </Link>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {COURSES.map((course) => (
+            <div key={course.id} className="group relative bg-[#111111] rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-500">
+              <div className="aspect-video relative overflow-hidden">
+                <img src={course.image} alt={course.title} className="w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-[#7c3aed] transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white" className="ml-1"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">{course.title}</h3>
+                  <span className="text-xl font-bold text-white">{course.price}</span>
+                </div>
+                <div className="flex gap-4 text-[#a1a1aa] text-xs uppercase tracking-widest font-bold mb-8">
+                  <span>{course.modules} Modules</span>
+                  <span>•</span>
+                  <span>{course.duration}</span>
+                </div>
+                <button className="w-full py-4 bg-white/5 border border-white/10 text-white text-[10px] tracking-[0.2em] uppercase font-bold hover:bg-white hover:text-black transition-all rounded-lg">
+                  Enroll Now
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
-
-      {/* Inject Sub-sections */}
-      <Marketplace />
-      <Portfolio />
+      </div>
     </main>
   );
 }
