@@ -28,6 +28,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <GlobalPlayer />
       </body>
     </html>
-
  );
 }
