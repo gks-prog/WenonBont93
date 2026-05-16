@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="w-full bg-[#0a0a0a] border-t border-white/5 pt-20 pb-10 px-[clamp(1.5rem,5vw,3rem)]">
@@ -12,14 +14,14 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Links Column 1 */}
+          {/* Links Column 1: Mapped to Actual Routes */}
           <div>
             <h4 className="text-white font-semibold text-xs tracking-[0.2em] uppercase mb-6">Navigation</h4>
             <ul className="flex flex-col gap-4 text-sm text-[#a1a1aa]">
-              <li><a href="#portfolio" className="hover:text-[#7c3aed] transition-colors">Portfolio</a></li>
-              <li><a href="#beats" className="hover:text-[#7c3aed] transition-colors">Beat Store</a></li>
-              <li><a href="#sample-packs" className="hover:text-[#7c3aed] transition-colors">Sample Packs</a></li>
-              <li><a href="#" className="hover:text-[#7c3aed] transition-colors">Client Login</a></li>
+              <li><Link href="/portfolio" className="hover:text-[#7c3aed] transition-colors">Portfolio</Link></li>
+              <li><Link href="/beats" className="hover:text-[#7c3aed] transition-colors">Beat Store</Link></li>
+              <li><Link href="/sample-packs" className="hover:text-[#7c3aed] transition-colors">Sample Packs</Link></li>
+              <li><Link href="/login" className="hover:text-[#7c3aed] transition-colors">Login</Link></li>
             </ul>
           </div>
 
@@ -27,10 +29,10 @@ export function Footer() {
           <div>
             <h4 className="text-white font-semibold text-xs tracking-[0.2em] uppercase mb-6">Support</h4>
             <ul className="flex flex-col gap-4 text-sm text-[#a1a1aa]">
-              <li><a href="#" className="hover:text-white transition-colors">FAQs</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Licensing Info</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><Link href="#" className="hover:text-white transition-colors">FAQs</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Licensing Info</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
