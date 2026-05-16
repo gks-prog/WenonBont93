@@ -15,6 +15,7 @@ interface AudioState {
   isPlaying: boolean;
   setTrack: (track: Track) => void;
   togglePlay: () => void;
+  stopPlayer: () => void;
 }
 
 export const useAudioStore = create<AudioState>((set) => ({
@@ -22,4 +23,5 @@ export const useAudioStore = create<AudioState>((set) => ({
   isPlaying: false,
   setTrack: (track) => set({ currentTrack: track, isPlaying: true }),
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  stopPlayer: () => set({ currentTrack: null, isPlaying: false }),
 }));
