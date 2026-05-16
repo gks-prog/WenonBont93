@@ -68,7 +68,7 @@ export function Navbar() {
               >
                 {item}
               </Link>
-            ))}
+            ))}a
           </nav>
         </div>
       </div>
