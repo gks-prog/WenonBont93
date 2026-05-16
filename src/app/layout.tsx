@@ -20,5 +20,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <GlobalPlayer />
       </body>
     </html>
-  );
+
+import { CartDrawer } from "@/components/ui/CartDrawer";
+// ...
+      <body className={`${inter.variable} font-sans bg-[#0a0a0a] text-white antialiased relative min-h-[100dvh]`}>
+        <Navbar />
+        {children}
+        <GlobalPlayer />
+        <CartDrawer />
+      </body>
+// ...
+ );
 }
