@@ -19,7 +19,6 @@ export interface CartItem {
 }
 
 interface AppState {
-  // Audio State
   playlist: Track[];
   currentIndex: number;
   currentTrack: Track | null;
@@ -30,7 +29,6 @@ interface AppState {
   prevTrack: () => void;
   stopPlayer: () => void;
   
-  // Cart State
   cart: CartItem[];
   isCartOpen: boolean;
   addToCart: (item: CartItem) => void;
@@ -39,7 +37,6 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
-  // Audio Logic
   playlist: [],
   currentIndex: -1,
   currentTrack: null,
@@ -63,12 +60,11 @@ export const useStore = create<AppState>((set, get) => ({
     set({ currentTrack: playlist[prevIndex], currentIndex: prevIndex, isPlaying: true });
   },
 
-  // Cart Logic
   cart: [],
   isCartOpen: false,
   addToCart: (item) => set((state) => ({ 
     cart: [...state.cart, item], 
-    isCartOpen: true // Auto-open cart to show feedback
+    isCartOpen: true 
   })),
   removeFromCart: (id) => set((state) => ({ 
     cart: state.cart.filter((item) => item.id !== id) 
