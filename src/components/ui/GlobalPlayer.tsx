@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAudioStore } from "@/lib/store/useAudioStore";
+import { useStore } from "@/lib/store/useAudioStore";
 
 export function GlobalPlayer() {
   const { currentTrack, isPlaying, togglePlay, stopPlayer } = useAudioStore();
