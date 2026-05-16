@@ -1,16 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navLinks = [
+    { name: "Portfolio", path: "/portfolio" },
+    { name: "Beats", path: "/beats" },
+    { name: "Sample Packs", path: "/sample-packs" },
+    { name: "Courses", path: "/courses" },
+  ];
 
   return (
     <header
@@ -29,19 +38,27 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden md:flex gap-10 items-center">
-          {["Portfolio", "Beats", "Sample Packs"].map((item) => (
-            <Link
-              key={item}
-              href={`#${item.replace(' ', '-').toLowerCase()}`}
-              className="text-xs tracking-[0.15em] uppercase font-medium text-[#a1a1aa] hover:text-white transition-colors duration-300 drop-shadow-sm"
-            >
-              {item}
-            </Link>
-          ))}
+          {navLinks.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <Link
+                key={item.name}
+                href={item.path}
+                className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors duration-300 drop-shadow-sm ${
+                  isActive ? "text-white border-b border-[#7c3aed] pb-1" : "text-[#a1a1aa] hover:text-white"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
           <div className="h-4 w-px bg-white/10 mx-2"></div>
-          <button className="text-xs tracking-[0.15em] uppercase font-medium text-white px-6 py-2.5 rounded-sm bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md transition-all duration-500">
+          <Link 
+            href="/login"
+            className="text-xs tracking-[0.15em] uppercase font-medium text-white px-6 py-2.5 rounded-sm bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md transition-all duration-500"
+          >
             Login
-          </button>
+          </Link>
         </nav>
       </div>
     </header>
