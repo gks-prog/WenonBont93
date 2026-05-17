@@ -56,7 +56,7 @@ export function AuthNavButton() {
 // If Guest: Show standard Login Button
   return (
     <Link 
-      href="/auth" 
+      href="/auth" // <--- CHANGE THIS IF YOUR FOLDER IS NAMED /login
       className="px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white border border-white/20 rounded-sm hover:bg-white hover:text-black transition-all"
     >
       Login
