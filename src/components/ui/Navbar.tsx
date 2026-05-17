@@ -1,63 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useStore } from "@/lib/store/useStore";
+import { AuthNavButton } from "./AuthNavButton";
 
-export function AuthNavButton() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+export default function Navbar() {
+  const { cart, openCart } = useStore();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  useEffect(() => {
-    // Check initial session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-      setLoading(false);
-    };
-    checkSession();
-
-    // Listen for login/logout events in real-time
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-      if (event === 'SIGNED_IN') router.refresh();
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [router, supabase.auth]);
-
-  if (loading) {
-    return <div className="w-8 h-8 rounded-full border border-white/20 animate-pulse bg-white/10" />;
-  }
-
-  // If Logged In: Show Luxury Circular Avatar
-  if (user) {
-    const initial = user.email ? user.email.charAt(0).toUpperCase() : "U";
-    return (
-      <Link href="/dashboard" className="relative group">
-        <div className="w-9 h-9 rounded-full bg-[#111] border border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-[#7c3aed] group-hover:shadow-[0_0_15px_rgba(124,58,237,0.5)]">
-          <span className="text-white text-xs font-bold font-mono">{initial}</span>
-        </div>
-      </Link>
-    );
-  }
-
-  // If Guest: Show standard Login Button
   return (
-    <Link 
-      href="/auth" 
-      className="px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white border border-white/20 rounded-sm hover:bg-white hover:text-black transition-all"
-    >
-      Login
-    </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+        
+        {/* LOGO */}
+        <Link href="/" className="text-white font-bold tracking-[0.3em] uppercase text-sm hover:text-[#7c3aed] transition-colors">
+          WENON BONT
+        </Link>
+
+        {/* NAVIGATION LINKS */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="/beats" className="text-[#a1a1aa] text-[10px] uppercase tracking-widest hover:text-white transition-colors">Beats</Link>
+          <Link href="/kits" className="text-[#a1a1aa] text-[10px] uppercase tracking-widest hover:text-white transition-colors">Sound Kits</Link>
+        </div>
+
+        {/* ACTIONS (Cart & Dynamic Auth) */}
+        <div className="flex items-center gap-6">
+          
+          {/* Cart Trigger */}
+          <button 
+            onClick={openCart}
+            className="text-white flex items-center gap-2 hover:text-[#7c3aed] transition-colors group"
+          >
+            <span className="text-[10px] uppercase tracking-widest hidden sm:block">Arsenal</span>
+            <div className="relative">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#7c3aed] text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cart.length}
+                </span>
+              )}
+            </div>
+          </button>
+
+          {/* Dynamic Circular User Avatar / Login Button */}
+          <AuthNavButton />
+          
+        </div>
+      </div>
+    </nav>
   );
 }
