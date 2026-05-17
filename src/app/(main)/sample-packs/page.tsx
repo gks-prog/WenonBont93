@@ -42,12 +42,12 @@ export default function SamplePacksPage() {
                 </div>
                 
                 <div className="mt-auto">
-                  <button 
-                    onClick={() => addToCart({ id: pack.id, title: pack.title, price: pack.price, image: pack.img, type: 'Pack' })}
-                    className="w-full md:w-auto px-12 py-5 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded-sm shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                  >
-                    Add to Arsenal
-                  </button>
+                 <button 
+  onClick={() => addToCart({ id: pack.id, title: pack.title, price: pack.price, image: pack.img, type: 'Pack' })}
+  className="w-full md:w-auto px-12 py-5 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded-sm shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+>
+  Add to Arsenal
+</button>
                 </div>
               </div>
             </div>
