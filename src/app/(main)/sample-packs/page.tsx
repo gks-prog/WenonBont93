@@ -3,8 +3,8 @@
 import { useStore } from "@/lib/store/useStore";
 
 const PACKS = [
-  { id: "p1", title: "CHROMA", type: "Melody Kit", price: "$29.99", tags: ["100 Loops", "MIDI Included", "100% Royalty Free"], desc: "High-fidelity analog synth loops processed through vintage tape machines.", img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800" },
-  { id: "p2", title: "DRAIN", type: "Drum Kit", price: "$19.99", tags: ["50 808s", "Perc Loops", "WAV Format"], desc: "Industry-standard drum sounds synthesized for maximum transient punch.", img: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800" },
+  { id: "p1", title: "CHROMA", type: "Pack", price: "$29.99", tags: ["100 Loops", "MIDI Included", "100% Royalty Free"], desc: "High-fidelity analog synth loops processed through vintage tape machines.", img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800" },
+  { id: "p2", title: "DRAIN", type: "Pack", price: "$19.99", tags: ["50 808s", "Perc Loops", "WAV Format"], desc: "Industry-standard drum sounds synthesized for maximum transient punch.", img: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800" },
 ];
 
 export default function SamplePacksPage() {
