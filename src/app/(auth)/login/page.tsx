@@ -40,7 +40,18 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+// Inside your login form component, add this state:
+const [isResetMode, setIsResetMode] = useState(false);
+const [message, setMessage] = useState("");
 
+// And add this button right under the password input:
+<button 
+  type="button" 
+  onClick={() => setIsResetMode(!isResetMode)}
+  className="text-[#a1a1aa] text-[10px] uppercase tracking-widest hover:text-white mt-2 self-start transition-colors"
+>
+  {isResetMode ? "Back to Login" : "Forgot Password?"}
+</button>
           <div className="flex flex-col gap-2">
             <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-[0.2em] ml-1">Email Address</label>
             <input name="email" type="email" placeholder="studio@example.com" className="bg-[#050505] border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-[#7c3aed] transition-colors" required />
