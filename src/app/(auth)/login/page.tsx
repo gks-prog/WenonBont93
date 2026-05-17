@@ -57,7 +57,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center">
           <button onClick={() => setIsLogin(!isLogin)} className="text-[#a1a1aa] hover:text-white text-[10px] uppercase tracking-widest transition-colors">
-            {isLogin ? "Need an account? Register here." : "Already a client? Sign in."}
+            {isLogin ? "Need an account? Register here." : "Already have an account ? Sign in."}
           </button>
         </div>
       </div>
