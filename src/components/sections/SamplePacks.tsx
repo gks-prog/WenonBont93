@@ -39,12 +39,18 @@ export function SamplePacks() {
                 </div>
 
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
-                  <button 
-                    onClick={() => addToCart({ id: pack.id, title: pack.title, price: pack.price, image: pack.image, type: 'Pack' })}
-                    className="px-8 py-3 bg-white text-black font-bold tracking-widest uppercase text-xs rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform"
-                  >
-                    Add to Cart - {pack.price}
-                  </button>
+             <button 
+  onClick={() => addToCart({ 
+    id: String(pack.id), // The Fix: Safely cast the number to a string
+    title: pack.title, 
+    price: pack.price, 
+    image: pack.image, 
+    type: 'Pack' 
+  })}
+  className="px-8 py-3 bg-white text-black font-bold tracking-widest uppercase text-xs rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform"
+>
+  Add to Cart - {pack.price}
+</button>
                 </div>
               </div>
 
