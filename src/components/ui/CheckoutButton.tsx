@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { useRouter } from "next/navigation"; // Native Next.js routing
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -18,7 +18,7 @@ interface CheckoutButtonProps {
 export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const router = useRouter(); // Initialize the router
+  const router = useRouter(); 
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,9 +47,8 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
       
       if (authError || !session) {
         setErrorMsg("AUTHENTICATION REQUIRED. ROUTING...");
-        // Force the redirect using Next.js router
-        // CRITICAL: Change "/auth" to "/login" if your login page is named differently.
-        router.push("/auth"); 
+        // FIXED: Hardcoded to /login to prevent 404
+        router.push("/login"); 
         return; 
       }
 
@@ -86,8 +85,8 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
         order_id: data.orderId,
         theme: { color: "#7c3aed" },
         handler: function () {
-          // Success routing
-          router.push("/dashboard?success=true");
+          // FIXED: Routes directly to your src/app/dashboard folder
+          router.push("/dashboard?success=true"); 
         },
       };
 
