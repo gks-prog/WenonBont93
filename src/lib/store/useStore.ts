@@ -5,7 +5,7 @@ export type Track = {
   id: string;
   title: string;
   price: string;
-  image?: string; // Image is now expected
+  image?: string; 
   type: 'Beat' | 'Pack' | 'Course';
   bpm?: number;
   genre?: string;
@@ -14,6 +14,7 @@ export type Track = {
 };
 
 interface StoreState {
+  // Cart State
   cart: Track[];
   isCartOpen: boolean;
   toastMessage: string | null; 
@@ -22,16 +23,32 @@ interface StoreState {
   openCart: () => void;
   closeCart: () => void;
   clearToast: () => void; 
+
+  // Player State
+  currentTrack: Track | null;
+  isPlaying: boolean;
+  playlist: Track[];
+  setTrack: (track: Track, newPlaylist?: Track[]) => void;
+  togglePlay: () => void;
+  stopPlayer: () => void;
+  nextTrack: () => void;
+  prevTrack: () => void;
 }
 
-// We wrap the store in 'persist' to permanently save cart data in localStorage
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      // Initial Cart State
       cart: [],
       isCartOpen: false,
       toastMessage: null,
 
+      // Initial Player State
+      currentTrack: null,
+      isPlaying: false,
+      playlist: [],
+
+      // Cart Actions
       addToCart: (item) => set((state) => {
         const existingItem = state.cart.find((i) => i.id === item.id);
         const newCart = existingItem 
@@ -43,7 +60,7 @@ export const useStore = create<StoreState>()(
 
         return {
           cart: newCart,
-          isCartOpen: true, // Auto-open cart when item added
+          isCartOpen: true,
           toastMessage: `${item.title} added to Arsenal`,
         };
       }),
@@ -55,10 +72,34 @@ export const useStore = create<StoreState>()(
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
       clearToast: () => set({ toastMessage: null }),
+
+      // Player Actions
+      setTrack: (track, newPlaylist) => set((state) => ({ 
+        currentTrack: track, 
+        isPlaying: true,
+        playlist: newPlaylist || state.playlist
+      })),
+      togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+      stopPlayer: () => set({ currentTrack: null, isPlaying: false }),
+      
+      nextTrack: () => set((state) => {
+        if (!state.currentTrack || state.playlist.length === 0) return state;
+        const currentIndex = state.playlist.findIndex(t => t.id === state.currentTrack?.id);
+        const nextIndex = (currentIndex + 1) % state.playlist.length;
+        return { currentTrack: state.playlist[nextIndex], isPlaying: true };
+      }),
+      
+      prevTrack: () => set((state) => {
+        if (!state.currentTrack || state.playlist.length === 0) return state;
+        const currentIndex = state.playlist.findIndex(t => t.id === state.currentTrack?.id);
+        const prevIndex = currentIndex === 0 ? state.playlist.length - 1 : currentIndex - 1;
+        return { currentTrack: state.playlist[prevIndex], isPlaying: true };
+      }),
     }),
     {
-      name: 'wenon-bont-storage', // The secret key saved in the browser
-      partialize: (state) => ({ cart: state.cart }), // Only save the cart items, not UI state like isCartOpen
+      name: 'wenon-bont-storage',
+      // CRITICAL: We only save the cart array. Saving the player state will crash the UI on reload.
+      partialize: (state) => ({ cart: state.cart }), 
     }
   )
 );
