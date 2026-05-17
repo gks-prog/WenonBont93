@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation"; // Native Next.js routing
 
 declare global {
   interface Window {
@@ -17,8 +18,8 @@ interface CheckoutButtonProps {
 export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter(); // Initialize the router
 
-  // Initialize a lightweight browser client to check auth status instantly
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -41,18 +42,18 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
     setErrorMsg("");
 
     try {
-      // 1. MANDATORY AUTH CHECK: Verify user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
+      // 1. Strict Auth Verification
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
       
-      if (!session) {
-        setErrorMsg("AUTHENTICATION REQUIRED. REDIRECTING...");
-        setTimeout(() => {
-          window.location.href = "/auth"; // Ensure this matches your login page URL route
-        }, 1500);
+      if (authError || !session) {
+        setErrorMsg("AUTHENTICATION REQUIRED. ROUTING...");
+        // Force the redirect using Next.js router
+        // CRITICAL: Change "/auth" to "/login" if your login page is named differently.
+        router.push("/auth"); 
         return; 
       }
 
-      // 2. Load Payment Gateway
+      // 2. Load Gateway
       const isLoaded = await loadRazorpayScript();
       if (!isLoaded) {
         setErrorMsg("Failed to load payment gateway. Turn off adblocker.");
@@ -60,7 +61,7 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
         return;
       }
 
-      // 3. Create Secure Order
+      // 3. Request Order Validation
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +76,7 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
         return;
       }
 
-      // 4. Open Razorpay
+      // 4. Mount Razorpay Overlay
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
         amount: data.amount,
@@ -84,13 +85,14 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
         description: "Secure Audio License Checkout",
         order_id: data.orderId,
         theme: { color: "#7c3aed" },
-        handler: function (response: any) {
-          window.location.href = "/dashboard?success=true";
+        handler: function () {
+          // Success routing
+          router.push("/dashboard?success=true");
         },
       };
 
       const paymentObject = new window.Razorpay(options);
-      paymentObject.on("payment.failed", function (response: any) {
+      paymentObject.on("payment.failed", function () {
         setErrorMsg("Transaction declined or cancelled.");
         setLoading(false);
       });
