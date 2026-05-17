@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginUser, registerUser, resetPassword } from "@/app/actions/auth";
 
 export default function LoginPage() {
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,14 +28,16 @@ export default function LoginPage() {
         if (res?.error) {
           setErrorMsg(res.error);
         } else if (res?.success) {
-          router.push("/dashboard"); // Client-side routing on success
+          // FIXED: Hard redirect to force cookie initialization
+          window.location.href = "/dashboard"; 
         }
       } else {
         const res = await loginUser(formData);
         if (res?.error) {
           setErrorMsg(res.error);
         } else if (res?.success) {
-          router.push("/dashboard"); // Client-side routing on success
+          // FIXED: Hard redirect to force cookie initialization
+          window.location.href = "/dashboard"; 
         }
       }
     } catch (err) {
@@ -53,7 +53,6 @@ export default function LoginPage() {
         
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white uppercase tracking-widest">
-            {/* TEXT FIX: Removed 'Client Portal' and 'Join the Arsenal' */}
             {isResetMode ? "Recover Access" : isRegister ? "Register" : "Login"}
           </h1>
           <p className="text-[#a1a1aa] text-xs uppercase tracking-[0.2em] mt-2">
