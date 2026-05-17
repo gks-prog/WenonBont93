@@ -22,6 +22,7 @@ interface StoreState {
   removeFromCart: (id: string) => void;
   openCart: () => void;
   closeCart: () => void;
+  toggleCart: () => void; // Added missing type definition
   clearToast: () => void; 
 
   // Player State
@@ -71,6 +72,7 @@ export const useStore = create<StoreState>()(
 
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
+      toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })), // Added missing logic
       clearToast: () => set({ toastMessage: null }),
 
       // Player Actions
@@ -98,7 +100,6 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'wenon-bont-storage',
-      // CRITICAL: We only save the cart array. Saving the player state will crash the UI on reload.
       partialize: (state) => ({ cart: state.cart }), 
     }
   )
