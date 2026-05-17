@@ -53,7 +53,7 @@ export function AuthNavButton() {
     );
   }
 
-  // If Guest: Show standard Login Button
+// If Guest: Show standard Login Button
   return (
     <Link 
       href="/auth" 
