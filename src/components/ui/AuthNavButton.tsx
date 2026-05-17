@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,10 +10,11 @@ export function AuthNavButton() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const supabase = createBrowserClient(
+  // 1. Memoize the client to prevent infinite re-renders
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  ), []);
 
   useEffect(() => {
     // Check initial session
@@ -24,16 +25,17 @@ export function AuthNavButton() {
     };
     checkSession();
 
-    // Listen for login/logout events in real-time
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // 2. Safely destructure the subscription object directly
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
       if (event === 'SIGNED_IN') router.refresh();
     });
 
+    // 3. Clean unmount
     return () => {
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [router, supabase.auth]);
+  }, [router, supabase]); // Safe dependency array
 
   if (loading) {
     return <div className="w-8 h-8 rounded-full border border-white/20 animate-pulse bg-white/10" />;
