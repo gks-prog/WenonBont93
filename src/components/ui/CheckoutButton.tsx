@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Script from "next/script";
 
-// Satisfy strict TypeScript for the injected window.Razorpay object
 declare global {
   interface Window {
     Razorpay: any;
@@ -17,13 +15,34 @@ interface CheckoutButtonProps {
 
 export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(""); // We now track exact errors
+
+  // Native script injection bypasses Next.js rendering issues
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
     setLoading(true);
+    setErrorMsg("");
 
     try {
-      // 1. Ask the backend to create a secure order
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        setErrorMsg("Failed to load payment gateway. Turn off adblocker.");
+        setLoading(false);
+        return;
+      }
+
+      // Ask Backend for Order ID
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,57 +52,54 @@ export function CheckoutButton({ cartItems, totalPrice }: CheckoutButtonProps) {
       const data = await response.json();
 
       if (!data.orderId) {
-        console.error("Order creation failed");
+        // This will print EXACTLY what is failing on the server
+        setErrorMsg(data.error || "Failed to create secure order.");
         setLoading(false);
         return;
       }
 
-      // 2. Configure the Razorpay Modal
+      // Open Razorpay Window
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Your public key
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
         amount: data.amount,
         currency: data.currency,
         name: "WENON BONT",
         description: "Secure Audio License Checkout",
         order_id: data.orderId,
-        theme: {
-          color: "#7c3aed", // Matches your cinematic purple branding
-        },
+        theme: { color: "#7c3aed" },
         handler: function (response: any) {
-          // 3. Payment Successful -> Redirect to Dashboard
-          // response.razorpay_payment_id contains the transaction receipt
           window.location.href = "/dashboard?success=true";
         },
       };
 
-      // 4. Open the UI overlay
       const paymentObject = new window.Razorpay(options);
-      
       paymentObject.on("payment.failed", function (response: any) {
-        console.error("Payment Failed", response.error.description);
+        setErrorMsg("Transaction declined or cancelled.");
         setLoading(false);
       });
-
       paymentObject.open();
 
     } catch (error) {
-      console.error("Network error:", error);
+      setErrorMsg("Network error occurred.");
       setLoading(false);
     }
   };
 
   return (
-    <>
-      {/* Inject the Razorpay logic into the Next.js document */}
-      <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
-      
+    <div className="flex flex-col gap-2 w-full">
+      {/* If an error happens, we will now see it rendered here */}
+      {errorMsg && (
+        <div className="text-red-500 text-[10px] text-center font-bold tracking-widest uppercase p-2 border border-red-500/20 bg-red-500/10 rounded-md">
+          {errorMsg}
+        </div>
+      )}
       <button 
         onClick={handleCheckout}
         disabled={loading || cartItems.length === 0}
-        className="w-full py-5 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+        className="w-full mt-4 py-5 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.1)]"
       >
         {loading ? "Encrypting Transaction..." : `Secure Checkout — ${totalPrice}`}
       </button>
-    </>
+    </div>
   );
 }
