@@ -9,11 +9,12 @@ export const Navbar = () => {
   const { cart, openCart } = useStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Define your navigation links here so they are easy to manage
+  // Here is your exact section list. 
+  // If a link is here, you MUST have a corresponding folder in src/app/
   const navLinks = [
     { name: "Beats", href: "/beats" },
     { name: "Sound Kits", href: "/kits" },
-    { name: "Services", href: "/services" }, // Add any missing sections here
+    { name: "Services", href: "/services" },
     { name: "Licensing", href: "/licensing" },
     { name: "Contact", href: "/contact" },
   ];
