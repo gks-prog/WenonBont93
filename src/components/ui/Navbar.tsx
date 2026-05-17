@@ -1,65 +1,63 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useStore } from "@/lib/store/useStore";
+import { createBrowserClient } from "@supabase/ssr";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const pathname = usePathname();
-  const { cart, toggleCart } = useStore();
+export function AuthNavButton() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // Check initial session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      setLoading(false);
+    };
+    checkSession();
 
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Portfolio", path: "/portfolio" },
-    { name: "Beats", path: "/beats" },
-    { name: "Sample Packs", path: "/sample-packs" },
-    { name: "Courses", path: "/courses" },
-  ];
+    // Listen for login/logout events in real-time
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+      if (event === 'SIGNED_IN') router.refresh();
+    });
 
-  return (
-    <header className={`fixed top-0 w-full z-[90] transition-all duration-700 ${scrolled ? "bg-white/[0.02] backdrop-blur-3xl backdrop-saturate-150 border-b border-white/10 py-4 shadow-2xl" : "bg-gradient-to-b from-black/80 to-transparent py-6"}`}>
-      <div className="w-full max-w-[1440px] mx-auto px-[clamp(1.5rem,5vw,3rem)] flex justify-between items-center">
-        <Link href="/" className="text-white font-bold text-xl md:text-2xl tracking-tighter hover:text-[#7c3aed] transition-colors duration-500">WENON BONT</Link>
-        
-        <div className="flex items-center gap-6 lg:gap-10">
-          <nav className="hidden lg:flex gap-10 items-center">
-            {navLinks.map((link) => (
-              <Link key={link.path} href={link.path} className={`text-[10px] tracking-[0.2em] uppercase font-bold transition-colors ${pathname === link.path ? "text-[#7c3aed]" : "text-[#a1a1aa] hover:text-white"}`}>
-                {link.name}
-              </Link>
-            ))}
-            <Link href="/login" className="ml-4 text-[10px] tracking-[0.2em] uppercase font-bold text-white px-8 py-3 bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all duration-500 rounded-sm">
-              Login/Register
-            </Link>
-          </nav>
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [router, supabase.auth]);
 
-          {/* Luxury Cart Trigger */}
-          <button 
-            data-cart-toggle
-            onClick={toggleCart}
-            className="relative p-2 text-white/70 hover:text-white transition-colors duration-300 group"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-105 transition-transform">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>
-            {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#7c3aed] text-white text-[8px] font-bold flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(124,58,237,0.5)] border border-[#0a0a0a]">
-                {cart.length}
-              </span>
-            )}
-          </button>
+  if (loading) {
+    return <div className="w-8 h-8 rounded-full border border-white/20 animate-pulse bg-white/10" />;
+  }
+
+  // If Logged In: Show Luxury Circular Avatar
+  if (user) {
+    const initial = user.email ? user.email.charAt(0).toUpperCase() : "U";
+    return (
+      <Link href="/dashboard" className="relative group">
+        <div className="w-9 h-9 rounded-full bg-[#111] border border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-[#7c3aed] group-hover:shadow-[0_0_15px_rgba(124,58,237,0.5)]">
+          <span className="text-white text-xs font-bold font-mono">{initial}</span>
         </div>
-      </div>
-    </header>
+      </Link>
+    );
+  }
+
+  // If Guest: Show standard Login Button
+  return (
+    <Link 
+      href="/auth" 
+      className="px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white border border-white/20 rounded-sm hover:bg-white hover:text-black transition-all"
+    >
+      Login
+    </Link>
   );
 }
