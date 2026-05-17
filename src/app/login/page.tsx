@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { loginUser, registerUser, resetPassword } from "@/app/actions/auth";
 
 export default function LoginPage() {
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,13 +27,21 @@ export default function LoginPage() {
         if (res?.success) setSuccessMsg(res.success);
       } else if (isRegister) {
         const res = await registerUser(formData);
-        if (res?.error) setErrorMsg(res.error);
+        if (res?.error) {
+          setErrorMsg(res.error);
+        } else if (res?.success) {
+          router.push("/dashboard"); // Client-side routing on success
+        }
       } else {
         const res = await loginUser(formData);
-        if (res?.error) setErrorMsg(res.error);
+        if (res?.error) {
+          setErrorMsg(res.error);
+        } else if (res?.success) {
+          router.push("/dashboard"); // Client-side routing on success
+        }
       }
     } catch (err) {
-      setErrorMsg("A network error occurred.");
+      setErrorMsg("A network error occurred. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -43,7 +53,8 @@ export default function LoginPage() {
         
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white uppercase tracking-widest">
-            {isResetMode ? "Recover Access" : isRegister ? "Join the Arsenal" : "Client Portal"}
+            {/* TEXT FIX: Removed 'Client Portal' and 'Join the Arsenal' */}
+            {isResetMode ? "Recover Access" : isRegister ? "Register" : "Login"}
           </h1>
           <p className="text-[#a1a1aa] text-xs uppercase tracking-[0.2em] mt-2">
             {isResetMode ? "Enter your email to reset password" : "Secure Audio Licensing"}
@@ -92,21 +103,23 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full mt-4 py-4 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded shadow-[0_0_20px_rgba(255,255,255,0.1)] disabled:opacity-50"
           >
-            {loading ? "Processing..." : isResetMode ? "Send Reset Link" : isRegister ? "Create Account" : "Authenticate"}
+            {loading ? "Processing..." : isResetMode ? "Send Reset Link" : isRegister ? "Register" : "Login"}
           </button>
         </form>
 
         <div className="mt-8 flex flex-col items-center gap-4 border-t border-white/10 pt-6">
           {!isResetMode && (
             <button 
+              type="button"
               onClick={() => { setIsRegister(!isRegister); setErrorMsg(""); }}
               className="text-[#a1a1aa] text-[10px] uppercase tracking-widest hover:text-white transition-colors"
             >
-              {isRegister ? "Already a User? Sign In." : "New here? Create an account."}
+              {isRegister ? "Already a User? Login." : "New here? Register."}
             </button>
           )}
 
           <button 
+            type="button"
             onClick={() => { setIsResetMode(!isResetMode); setErrorMsg(""); setSuccessMsg(""); setIsRegister(false); }}
             className="text-[#7c3aed] text-[10px] uppercase tracking-widest hover:text-white transition-colors"
           >
