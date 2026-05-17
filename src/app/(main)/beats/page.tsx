@@ -13,10 +13,22 @@ export default function BeatsPage() {
   const { currentTrack, isPlaying, setTrack, togglePlay, addToCart } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredBeats = BEATS.filter(beat => 
-    beat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    beat.genre.toLowerCase().includes(searchQuery.toLowerCase())
+// 1. Optimize performance by computing the lowercase query exactly once
+// We also use a fallback ("") in case searchQuery itself is ever undefined
+const lowerCaseQuery = (searchQuery || "").toLowerCase();
+
+const filteredBeats = BEATS.filter(beat => {
+  // 2. Safely extract values with fallback empty strings
+  // This guarantees we never call .toLowerCase() on undefined or null
+  const safeTitle = beat.title || "";
+  const safeGenre = beat.genre || "";
+
+  // 3. Perform the search match safely
+  return (
+    safeTitle.toLowerCase().includes(lowerCaseQuery) ||
+    safeGenre.toLowerCase().includes(lowerCaseQuery)
   );
+});
 
   return (
     <main className="pt-32 pb-20 bg-[#0a0a0a] min-h-screen px-[clamp(1.5rem,5vw,3rem)]">
