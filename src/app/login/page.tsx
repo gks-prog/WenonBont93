@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser, registerUser, resetPassword } from "@/app/actions/auth";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
   const [isResetMode, setIsResetMode] = useState(false);
@@ -9,6 +10,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const router = useRouter();
+
+  // Initialize Supabase directly on the client so the Navbar hears the login event
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,27 +25,39 @@ export default function LoginPage() {
     setSuccessMsg("");
 
     const formData = new FormData(e.currentTarget);
+    const rawEmail = formData.get("email") as string;
+    const email = rawEmail ? rawEmail.trim().toLowerCase() : "";
+    const password = formData.get("password") as string;
 
     try {
       if (isResetMode) {
-        const res = await resetPassword(formData);
-        if (res?.error) setErrorMsg(res.error);
-        if (res?.success) setSuccessMsg(res.success);
+        // Handle Password Reset
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) setErrorMsg(error.message);
+        else setSuccessMsg("Password reset link sent to your email.");
+        
       } else if (isRegister) {
-        const res = await registerUser(formData);
-        if (res?.error) {
-          setErrorMsg(res.error);
-        } else if (res?.success) {
-          // FIXED: Hard redirect to force cookie initialization
-          window.location.href = "/dashboard"; 
+        // Handle Registration
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          if (error.message.includes("already registered")) {
+            setErrorMsg("This email is already registered. Please login.");
+          } else {
+            setErrorMsg(error.message);
+          }
+        } else {
+          // Success: Route to dashboard. The Navbar will instantly update.
+          router.push("/dashboard"); 
         }
+        
       } else {
-        const res = await loginUser(formData);
-        if (res?.error) {
-          setErrorMsg(res.error);
-        } else if (res?.success) {
-          // FIXED: Hard redirect to force cookie initialization
-          window.location.href = "/dashboard"; 
+        // Handle Login
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setErrorMsg("Invalid email or password. Please try again.");
+        } else {
+          // Success: Route to dashboard. The Navbar will instantly update.
+          router.push("/dashboard");
         }
       }
     } catch (err) {
