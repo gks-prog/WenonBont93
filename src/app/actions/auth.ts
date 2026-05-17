@@ -12,7 +12,6 @@ export async function loginUser(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "Invalid email or password. Please try again." };
   
-  // The redirect must happen outside the try/catch or error block
   redirect("/dashboard");
 }
 
