@@ -1,73 +1,71 @@
 import { create } from 'zustand';
 
-export interface Track {
+export type Track = {
   id: string;
   title: string;
-  bpm: number;
-  genre: string;
-  image: string;
-  audioUrl: string;
-  price: string;
-}
-
-export interface CartItem {
-  id: string | number;
-  title: string;
   price: string;
   image: string;
-  type: 'Beat' | 'Pack';
-}
+  type: 'Beat' | 'Pack' | 'Course';
+  bpm?: number;
+  genre?: string;
+  audioUrl?: string;
+};
 
-interface AppState {
-  playlist: Track[];
-  currentIndex: number;
+interface StoreState {
+  // Cart State
+  cart: Track[];
+  isCartOpen: boolean;
+  hasOpenedCartThisSession: boolean;
+  
+  // Cart Actions
+  addToCart: (item: Track) => void;
+  removeFromCart: (id: string) => void;
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
+
+  // Audio State (Preserved for your beats player)
   currentTrack: Track | null;
   isPlaying: boolean;
-  setTrack: (track: Track, playlist: Track[]) => void;
+  setTrack: (track: Track, playlist?: Track[]) => void;
   togglePlay: () => void;
-  nextTrack: () => void;
-  prevTrack: () => void;
-  stopPlayer: () => void;
-  
-  cart: CartItem[];
-  isCartOpen: boolean;
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string | number) => void;
-  toggleCart: () => void;
 }
 
-export const useStore = create<AppState>((set, get) => ({
-  playlist: [],
-  currentIndex: -1,
-  currentTrack: null,
-  isPlaying: false,
-  setTrack: (track, playlist) => {
-    const index = playlist.findIndex((t) => t.id === track.id);
-    set({ currentTrack: track, playlist, currentIndex: index, isPlaying: true });
-  },
-  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
-  stopPlayer: () => set({ currentTrack: null, isPlaying: false, playlist: [] }),
-  nextTrack: () => {
-    const { playlist, currentIndex } = get();
-    if (playlist.length === 0) return;
-    const nextIndex = currentIndex === playlist.length - 1 ? 0 : currentIndex + 1;
-    set({ currentTrack: playlist[nextIndex], currentIndex: nextIndex, isPlaying: true });
-  },
-  prevTrack: () => {
-    const { playlist, currentIndex } = get();
-    if (playlist.length === 0) return;
-    const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
-    set({ currentTrack: playlist[prevIndex], currentIndex: prevIndex, isPlaying: true });
-  },
-
+export const useStore = create<StoreState>((set, get) => ({
+  // Initial State
   cart: [],
   isCartOpen: false,
-  addToCart: (item) => set((state) => ({ 
-    cart: [...state.cart, item], 
-    isCartOpen: true 
+  hasOpenedCartThisSession: false,
+  currentTrack: null,
+  isPlaying: false,
+
+  // Enhanced Cart Logic
+  addToCart: (item) => set((state) => {
+    const isFirstTime = !state.hasOpenedCartThisSession;
+    return {
+      cart: [...state.cart, item],
+      // Only force open if it's the absolute first interaction
+      isCartOpen: isFirstTime ? true : state.isCartOpen,
+      hasOpenedCartThisSession: true,
+    };
+  }),
+  
+  removeFromCart: (id) => set((state) => {
+    const newCart = state.cart.filter((item) => item.id !== id);
+    return {
+      cart: newCart,
+      // Auto-close if the cart becomes empty
+      isCartOpen: newCart.length === 0 ? false : state.isCartOpen,
+    };
+  }),
+
+  openCart: () => set({ isCartOpen: true }),
+  closeCart: () => set({ isCartOpen: false }),
+  toggleCart: () => set((state) => ({ 
+    isCartOpen: state.cart.length > 0 ? !state.isCartOpen : false 
   })),
-  removeFromCart: (id) => set((state) => ({ 
-    cart: state.cart.filter((item) => item.id !== id) 
-  })),
-  toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
+
+  // Audio Actions
+  setTrack: (track) => set({ currentTrack: track, isPlaying: true }),
+  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
 }));
