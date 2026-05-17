@@ -9,14 +9,12 @@ export const Navbar = () => {
   const { cart, openCart } = useStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Here is your exact section list. 
-  // If a link is here, you MUST have a corresponding folder in src/app/
+  // Mapped exactly to your existing src/app/(main)/ folders
   const navLinks = [
     { name: "Beats", href: "/beats" },
-    { name: "Sound Kits", href: "/kits" },
-    { name: "Services", href: "/services" },
-    { name: "Licensing", href: "/licensing" },
-    { name: "Contact", href: "/contact" },
+    { name: "Sample Packs", href: "/sample-packs" },
+    { name: "Courses", href: "/courses" },
+    { name: "Portfolio", href: "/portfolio" },
   ];
 
   return (
@@ -24,8 +22,8 @@ export const Navbar = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/10 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
           
-          {/* LEFT: LOGO */}
-          <Link href="/" className="text-white font-black tracking-[0.3em] uppercase text-sm md:text-base hover:text-[#7c3aed] transition-colors z-50">
+          {/* LEFT: LOGO (Reverted to original styling) */}
+          <Link href="/" className="text-white font-bold tracking-[0.3em] uppercase text-sm hover:text-[#7c3aed] transition-colors z-50">
             WENON BONT
           </Link>
 
