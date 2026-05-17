@@ -9,27 +9,26 @@ export type Track = {
   bpm?: number;
   genre?: string;
   audioUrl?: string;
+  quantity?: number; // Tracks multiple additions
 };
 
 interface StoreState {
-  // Cart State
   cart: Track[];
   isCartOpen: boolean;
   hasOpenedCartThisSession: boolean;
+  toastMessage: string | null; 
   
-  // Cart Actions
   addToCart: (item: Track) => void;
   removeFromCart: (id: string) => void;
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
+  clearToast: () => void; 
 
-  // Audio State
   currentTrack: Track | null;
   isPlaying: boolean;
   playlist: Track[];
 
-  // Audio Actions
   setTrack: (track: Track, newPlaylist?: Track[]) => void;
   togglePlay: () => void;
   stopPlayer: () => void;
@@ -38,49 +37,53 @@ interface StoreState {
 }
 
 export const useStore = create<StoreState>((set, get) => ({
-  // Initial State
   cart: [],
   isCartOpen: false,
   hasOpenedCartThisSession: false,
+  toastMessage: null,
   currentTrack: null,
   isPlaying: false,
   playlist: [],
 
-  // Enhanced Cart Logic
   addToCart: (item) => set((state) => {
-    const isFirstTime = !state.hasOpenedCartThisSession;
+    // 1. Check if product already exists
+    const existingItem = state.cart.find((i) => i.id === item.id);
+    
+    // 2. Add new or increment quantity
+    const newCart = existingItem 
+      ? state.cart.map((i) => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i)
+      : [...state.cart, { ...item, quantity: 1 }];
+
+    // 3. Handle Toast Notification Logic
+    if (state.toastMessage) clearTimeout((window as any).toastTimer);
+    (window as any).toastTimer = setTimeout(() => {
+      get().clearToast();
+    }, 3000);
+
     return {
-      cart: [...state.cart, item],
-      // Only force open if it's the absolute first interaction
-      isCartOpen: isFirstTime ? true : state.isCartOpen,
+      cart: newCart,
+      isCartOpen: !state.hasOpenedCartThisSession ? true : state.isCartOpen,
       hasOpenedCartThisSession: true,
+      toastMessage: `${item.title} added to Arsenal`,
     };
   }),
   
-  removeFromCart: (id) => set((state) => {
-    const newCart = state.cart.filter((item) => item.id !== id);
-    return {
-      cart: newCart,
-      // Auto-close if the cart becomes empty
-      isCartOpen: newCart.length === 0 ? false : state.isCartOpen,
-    };
-  }),
+  removeFromCart: (id) => set((state) => ({
+    // Safely remove the item. We removed the code that forces the cart to close here.
+    cart: state.cart.filter((item) => item.id !== id),
+  })),
 
   openCart: () => set({ isCartOpen: true }),
   closeCart: () => set({ isCartOpen: false }),
-  toggleCart: () => set((state) => ({ 
-    isCartOpen: state.cart.length > 0 ? !state.isCartOpen : false 
-  })),
+  toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
+  clearToast: () => set({ toastMessage: null }),
 
-  // Audio Actions
   setTrack: (track, newPlaylist) => set((state) => ({ 
     currentTrack: track, 
     isPlaying: true,
     playlist: newPlaylist || state.playlist
   })),
-  
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
-  
   stopPlayer: () => set({ currentTrack: null, isPlaying: false }),
   
   nextTrack: () => set((state) => {
