@@ -24,11 +24,17 @@ interface StoreState {
   closeCart: () => void;
   toggleCart: () => void;
 
-  // Audio State (Preserved for your beats player)
+  // Audio State
   currentTrack: Track | null;
   isPlaying: boolean;
-  setTrack: (track: Track, playlist?: Track[]) => void;
+  playlist: Track[];
+
+  // Audio Actions
+  setTrack: (track: Track, newPlaylist?: Track[]) => void;
   togglePlay: () => void;
+  stopPlayer: () => void;
+  nextTrack: () => void;
+  prevTrack: () => void;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -38,6 +44,7 @@ export const useStore = create<StoreState>((set, get) => ({
   hasOpenedCartThisSession: false,
   currentTrack: null,
   isPlaying: false,
+  playlist: [],
 
   // Enhanced Cart Logic
   addToCart: (item) => set((state) => {
@@ -66,6 +73,27 @@ export const useStore = create<StoreState>((set, get) => ({
   })),
 
   // Audio Actions
-  setTrack: (track) => set({ currentTrack: track, isPlaying: true }),
+  setTrack: (track, newPlaylist) => set((state) => ({ 
+    currentTrack: track, 
+    isPlaying: true,
+    playlist: newPlaylist || state.playlist
+  })),
+  
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  
+  stopPlayer: () => set({ currentTrack: null, isPlaying: false }),
+  
+  nextTrack: () => set((state) => {
+    if (!state.currentTrack || state.playlist.length === 0) return state;
+    const currentIndex = state.playlist.findIndex(t => t.id === state.currentTrack?.id);
+    const nextIndex = (currentIndex + 1) % state.playlist.length;
+    return { currentTrack: state.playlist[nextIndex], isPlaying: true };
+  }),
+  
+  prevTrack: () => set((state) => {
+    if (!state.currentTrack || state.playlist.length === 0) return state;
+    const currentIndex = state.playlist.findIndex(t => t.id === state.currentTrack?.id);
+    const prevIndex = currentIndex === 0 ? state.playlist.length - 1 : currentIndex - 1;
+    return { currentTrack: state.playlist[prevIndex], isPlaying: true };
+  }),
 }));
