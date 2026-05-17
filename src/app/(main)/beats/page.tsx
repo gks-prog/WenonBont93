@@ -3,10 +3,10 @@
 import { useStore, Track } from "@/lib/store/useStore";
 import { useState } from "react";
 
-const BEATS: Track[] = [
-  { id: "b1", title: "ETHEREAL", bpm: 140, genre: "Trap", price: "$49.99", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800", audioUrl: "" },
-  { id: "b2", title: "NOCTURNAL", bpm: 128, genre: "Techno", price: "$59.99", image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800", audioUrl: "" },
-  { id: "b3", title: "VANGUARD", bpm: 110, genre: "Boom Bap", price: "$39.99", image: "https://images.unsplash.com/photo-1518814441584-1845fbb1f20d?w=800", audioUrl: "" },
+  const BEATS: Track[] = [
+  { id: "b1", title: "ETHEREAL", type: "Beat", bpm: 140, genre: "Trap", price: "$49.99", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800", audioUrl: "" },
+  { id: "b2", title: "NOCTURNAL", type: "Beat", bpm: 128, genre: "Techno", price: "$59.99", image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800", audioUrl: "" },
+  { id: "b3", title: "VANGUARD", type: "Beat", bpm: 110, genre: "Boom Bap", price: "$39.99", image: "https://images.unsplash.com/photo-1518814441584-1845fbb1f20d?w=800", audioUrl: "" },
 ];
 
 export default function BeatsPage() {
