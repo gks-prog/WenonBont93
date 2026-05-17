@@ -1,45 +1,46 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import Razorpay from 'razorpay';
 
-// Initialize Stripe securely on the server
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10', // Use the latest API version
+// Initialize Razorpay securely on the server
+const razorpay = new Razorpay({
+  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
 });
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items } = body; // Array of items from your Zustand Cart
+    const { items } = body;
 
-    // Format your cart items for Stripe
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: item.title,
-          images: [item.image], // Optional: Show the pack/beat artwork in checkout
-        },
-        // Stripe expects amounts in cents (e.g., $29.99 -> 2999)
-        unit_amount: Math.round(parseFloat(item.price.replace('$', '')) * 100),
-      },
-      quantity: 1,
-    }));
+    // 1. Calculate the total price safely from your cart strings (e.g., "$49.99")
+    const totalAmount = items.reduce((acc: number, item: any) => {
+      // Strip out the currency symbol and parse the number
+      const price = parseFloat(item.price.replace(/[^0-9.-]+/g, ""));
+      return acc + (isNaN(price) ? 0 : price);
+    }, 0);
 
-    // Create the session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart?canceled=true`,
-      // Optional: Pass metadata like the track ID to fulfill the order later via Webhooks
-      metadata: {
-        orderType: 'digital_download'
-      }
+    // 2. Razorpay expects amounts in subunits (e.g., paise for INR, cents for USD)
+    // $49.99 * 100 = 4999
+    const amountInSubunits = Math.round(totalAmount * 100);
+
+    // 3. Create the secure order
+    const options = {
+      amount: amountInSubunits,
+      currency: "USD", // Change this to "INR" if you are charging in Indian Rupees
+      receipt: `rcpt_${Math.random().toString(36).substring(7)}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+    
+    // 4. Send the order details back to the frontend
+    return NextResponse.json({ 
+      orderId: order.id, 
+      amount: options.amount, 
+      currency: options.currency 
     });
 
-    return NextResponse.json({ url: session.url });
   } catch (err: any) {
+    console.error("Razorpay Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
