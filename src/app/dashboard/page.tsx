@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function DashboardPage() {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("Client");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("purchases");
-  const router = useRouter();
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,38 +14,27 @@ export default function DashboardPage() {
   );
 
   useEffect(() => {
-    let isMounted = true;
-
     const loadSession = async () => {
       try {
-        // CRITICAL FIX: Give the browser 200ms to parse the incoming cookies before checking
-        await new Promise(resolve => setTimeout(resolve, 200)); 
-        
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (isMounted) {
-          if (session?.user?.email) {
-            setUserEmail(session.user.email);
-            setLoading(false);
-          } else {
-            router.replace("/login");
-          }
+        if (session && session.user) {
+          if (session.user.email) setUserEmail(session.user.email);
+          setLoading(false); // Unlock the page
+        } else {
+          window.location.href = "/login"; // Hard bounce to login
         }
       } catch (err) {
-        if (isMounted) router.replace("/login");
+        window.location.href = "/login";
       }
     };
 
     loadSession();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [supabase, router]);
+  }, [supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.replace("/login");
+    window.location.href = "/login";
   };
 
   if (loading) {
@@ -91,7 +78,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-col gap-2">
                     <label className="text-white text-[10px] uppercase tracking-widest font-bold">Email Address</label>
-                    <input type="email" disabled value={userEmail || ""} className="bg-black/50 border border-white/10 text-white/50 px-4 py-3 rounded text-sm cursor-not-allowed" />
+                    <input type="email" disabled value={userEmail} className="bg-black/50 border border-white/10 text-white/50 px-4 py-3 rounded text-sm cursor-not-allowed" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-white text-[10px] uppercase tracking-widest font-bold">New Password</label>
