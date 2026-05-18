@@ -16,12 +16,18 @@ export default function LoginPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg("");
-    setSuccessMsg("");
+  // Inside your handleSubmit function...
 
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setErrorMsg("Invalid email or password. Please try again.");
+          setLoading(false); 
+        } else {
+          setSuccessMsg("Success! Routing to dashboard...");
+          // CRITICAL: Push to the dashboard, then tell Next.js to refresh the server data
+          router.push("/dashboard");
+          router.refresh(); 
+        }
     const formData = new FormData(e.currentTarget);
     const email = (formData.get("email") as string)?.trim().toLowerCase() || "";
     const password = formData.get("password") as string;
