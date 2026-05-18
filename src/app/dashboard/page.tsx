@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function DashboardPage() {
-  const [userEmail, setUserEmail] = useState<string>("Loading...");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("purchases");
 
@@ -14,32 +14,19 @@ export default function DashboardPage() {
   );
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (isMounted) {
-          if (session?.user?.email) {
-            setUserEmail(session.user.email);
-          } else {
-            // Fallback text if the client is slow to read the cookie, 
-            // but we DO NOT kick them back to login anymore.
-            setUserEmail("Authenticated Client"); 
-          }
-          setLoading(false);
-        }
-      } catch (err) {
-        if (isMounted) setLoading(false);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Strict client-side security bounce
+        window.location.href = "/login";
+      } else {
+        setUserEmail(session.user.email || "Client");
+        setLoading(false);
       }
     };
 
-    loadSession();
-
-    return () => {
-      isMounted = false;
-    };
+    checkSession();
   }, [supabase]);
 
   const handleSignOut = async () => {
@@ -88,7 +75,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-col gap-2">
                     <label className="text-white text-[10px] uppercase tracking-widest font-bold">Email Address</label>
-                    <input type="email" disabled value={userEmail !== "Loading..." && userEmail !== "Authenticated Client" ? userEmail : ""} className="bg-black/50 border border-white/10 text-white/50 px-4 py-3 rounded text-sm cursor-not-allowed" />
+                    <input type="email" disabled value={userEmail || ""} className="bg-black/50 border border-white/10 text-white/50 px-4 py-3 rounded text-sm cursor-not-allowed" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-white text-[10px] uppercase tracking-widest font-bold">New Password</label>
