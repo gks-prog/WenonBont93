@@ -16,21 +16,30 @@ export default function DashboardPage() {
   );
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = "/login"; // Kick guests out instantly
-      } else {
-        setUser(session.user);
-        setLoading(false);
+    let isMounted = true;
+
+    // FIXED: Use a real-time listener instead of a one-time rigid check
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        if (isMounted) {
+          setUser(session.user);
+          setLoading(false);
+        }
+      } else if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+        // Only kick them if Supabase firmly confirms they are logged out
+        if (isMounted) router.push("/login");
       }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
     };
-    checkUser();
-  }, [supabase]);
+  }, [supabase, router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   if (loading) {
@@ -88,7 +97,6 @@ export default function DashboardPage() {
               <div className="animate-in fade-in duration-500">
                 <h2 className="text-white text-sm font-bold uppercase tracking-widest mb-6 border-b border-white/10 pb-4">Order History</h2>
                 
-                {/* Dummy Order Component - Will map actual database later */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/50 border border-white/5 rounded-lg gap-4">
                   <div>
                     <h3 className="text-white font-bold text-sm">DARK KNIGHT - UNLIMITED LEASE</h3>
