@@ -4,28 +4,41 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function DashboardPage() {
-  const [userEmail, setUserEmail] = useState<string>("Client");
+  const [userEmail, setUserEmail] = useState<string>("Loading...");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("purchases");
+  
+  // NEW: Diagnostic State
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
   );
 
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (session && session.user) {
-          if (session.user.email) setUserEmail(session.user.email);
-          setLoading(false); // Unlock the page
-        } else {
-          window.location.href = "/login"; // Hard bounce to login
+        if (error) {
+          setAuthError(`Supabase Error: ${error.message}`);
+          setLoading(false);
+          return;
         }
-      } catch (err) {
-        window.location.href = "/login";
+
+        if (session && session.user) {
+          setUserEmail(session.user.email || "Unknown Email");
+          setLoading(false);
+        } else {
+          // CRITICAL FIX: We are NO LONGER bouncing you back to /login.
+          // We are trapping the error on the screen so you can see it.
+          setAuthError("CRITICAL: The route to /dashboard worked, but the browser dropped your session cookie during the jump. You are seeing this page as a Guest.");
+          setLoading(false);
+        }
+      } catch (err: any) {
+        setAuthError(`Fatal Catch Error: ${err.message}`);
+        setLoading(false);
       }
     };
 
@@ -45,6 +58,22 @@ export default function DashboardPage() {
     );
   }
 
+  // THE DIAGNOSTIC SCREEN
+  if (authError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] px-4 text-center">
+        <div className="w-full max-w-lg bg-red-500/10 border border-red-500/50 rounded-xl p-8 shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+          <h1 className="text-red-500 text-xl font-bold uppercase tracking-widest mb-4">Diagnostic Halt</h1>
+          <p className="text-[#a1a1aa] text-sm mb-8 leading-relaxed">{authError}</p>
+          <a href="/login" className="px-6 py-3 bg-red-500 text-white text-[10px] uppercase tracking-widest font-bold rounded hover:bg-red-600 transition-colors">
+            Return to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // THE REAL DASHBOARD
   return (
     <div className="min-h-screen bg-[#0a0a0a] pt-24 px-4 md:px-8 pb-12">
       <div className="max-w-6xl mx-auto">
