@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
@@ -10,6 +11,8 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const router = useRouter();
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,8 +54,9 @@ export default function LoginPage() {
           }
           setLoading(false);
         } else {
-          // FIXED: Hard browser redirect. Cannot hang. Cannot fail silently.
-          window.location.href = "/dashboard";
+          setSuccessMsg("Success! Routing to dashboard...");
+          router.push("/dashboard");
+          setLoading(false); // Unlock the button
         }
         
       } else {
@@ -61,8 +65,9 @@ export default function LoginPage() {
           setErrorMsg("Invalid email or password. Please try again.");
           setLoading(false);
         } else {
-          // FIXED: Hard browser redirect. Cannot hang. Cannot fail silently.
-          window.location.href = "/dashboard";
+          setSuccessMsg("Success! Routing to dashboard...");
+          router.push("/dashboard");
+          setLoading(false); // Unlock the button
         }
       }
     } catch (err) {
@@ -91,7 +96,7 @@ export default function LoginPage() {
         )}
 
         {successMsg && (
-          <div className="mb-6 p-3 bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] font-bold uppercase tracking-widest text-center rounded">
+          <div className="mb-6 p-3 bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[#7c3aed] text-[10px] font-bold uppercase tracking-widest text-center rounded">
             {successMsg}
           </div>
         )}
