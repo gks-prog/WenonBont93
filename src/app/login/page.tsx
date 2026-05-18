@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
@@ -12,14 +11,12 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const router = useRouter();
-
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
@@ -50,11 +47,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           setErrorMsg(error.message.includes("already registered") ? "This email is already registered. Please login." : error.message);
           setLoading(false); 
         } else {
-          setSuccessMsg("Success! Forcing secure redirect...");
-          // CRITICAL: Bypasses Next.js cache completely.
+          setSuccessMsg("Success! Routing securely to dashboard...");
+          // CRITICAL: 1.5 seconds gives the browser unquestionable time to sync cookies
           setTimeout(() => {
-            window.location.assign("/dashboard");
-          }, 500);
+            window.location.href = "/dashboard";
+          }, 1500);
         }
         
       } else {
@@ -63,11 +60,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           setErrorMsg("Invalid email or password. Please try again.");
           setLoading(false); 
         } else {
-          setSuccessMsg("Success! Forcing secure redirect...");
-          // CRITICAL: Bypasses Next.js cache completely.
+          setSuccessMsg("Success! Routing securely to dashboard...");
+          // CRITICAL: 1.5 seconds gives the browser unquestionable time to sync cookies
           setTimeout(() => {
-            window.location.assign("/dashboard");
-          }, 500);
+            window.location.href = "/dashboard";
+          }, 1500);
         }
       }
     } catch (err) {
@@ -75,6 +72,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 pt-20">
       <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-xl p-8 shadow-2xl">
