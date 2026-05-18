@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import Link from "next/link";
 
 export function AuthNavButton() {
   const [user, setUser] = useState<any>(null);
@@ -40,30 +41,25 @@ export function AuthNavButton() {
     return <div className="w-8 h-8 rounded-full border border-white/20 animate-pulse bg-white/10" />;
   }
 
-  // If Logged In: Show Luxury Circular Avatar
+  // If Logged In: Show Luxury Circular Avatar wrapped in a strict Next.js Link
   if (user) {
     const initial = user.email ? user.email.charAt(0).toUpperCase() : "U";
     return (
-      <button 
-        // FIXED: Hard redirect instead of Next.js Link
-        onClick={() => window.location.href = "/dashboard"} 
-        className="relative group cursor-pointer border-none bg-transparent p-0"
-      >
+      <Link href="/dashboard" className="relative group block">
         <div className="w-9 h-9 rounded-full bg-[#111] border border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-[#7c3aed] group-hover:shadow-[0_0_15px_rgba(124,58,237,0.5)]">
           <span className="text-white text-xs font-bold font-mono">{initial}</span>
         </div>
-      </button>
+      </Link>
     );
   }
 
-  // If Guest: Show standard Login Button
+  // If Guest: Show standard Login Button wrapped in a strict Next.js Link
   return (
-    <button 
-      // FIXED: Hard redirect instead of Next.js Link
-      onClick={() => window.location.href = "/login"}
+    <Link 
+      href="/login"
       className="px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white border border-white/20 rounded-sm hover:bg-white hover:text-black transition-all"
     >
       Login
-    </button>
+    </Link>
   );
 }
