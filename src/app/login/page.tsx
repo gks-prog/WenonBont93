@@ -19,7 +19,7 @@ export default function LoginPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
@@ -50,9 +50,11 @@ export default function LoginPage() {
           setErrorMsg(error.message.includes("already registered") ? "This email is already registered. Please login." : error.message);
           setLoading(false); 
         } else {
-          setSuccessMsg("Success! Routing to dashboard...");
-          router.push("/dashboard");
-          router.refresh();
+          setSuccessMsg("Success! Forcing secure redirect...");
+          // CRITICAL: Bypasses Next.js cache completely.
+          setTimeout(() => {
+            window.location.assign("/dashboard");
+          }, 500);
         }
         
       } else {
@@ -61,9 +63,11 @@ export default function LoginPage() {
           setErrorMsg("Invalid email or password. Please try again.");
           setLoading(false); 
         } else {
-          setSuccessMsg("Success! Routing to dashboard...");
-          router.push("/dashboard");
-          router.refresh();
+          setSuccessMsg("Success! Forcing secure redirect...");
+          // CRITICAL: Bypasses Next.js cache completely.
+          setTimeout(() => {
+            window.location.assign("/dashboard");
+          }, 500);
         }
       }
     } catch (err) {
@@ -71,7 +75,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 pt-20">
       <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-xl p-8 shadow-2xl">
