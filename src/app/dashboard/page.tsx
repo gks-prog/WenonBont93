@@ -2,7 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+// 1. Add this import at the top
+import { useAudio } from "@/context/AudioContext";
 
+export default function DashboardPage() {
+  // 2. Call the hook inside your component
+  const { playTrack, currentTrack, isPlaying } = useAudio();
+  
+  // ... (keep your existing state and Supabase logic) ...
+
+  // 3. Update the "Play" button in the "purchases" tab:
+  {activeTab === "purchases" && (
+    <div className="animate-in fade-in duration-500">
+      <h2 className="text-white text-sm font-bold uppercase tracking-widest mb-6 border-b border-white/10 pb-4">Order History</h2>
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/50 border border-white/5 rounded-lg gap-4">
+        <div>
+          <h3 className="text-white font-bold text-sm">DARK KNIGHT - UNLIMITED LEASE</h3>
+          <p className="text-[#a1a1aa] text-[10px] uppercase tracking-widest mt-1">Order #WB-9921 • May 18, 2026</p>
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          
+          {/* CRITICAL FIX: The Play Button triggers the Global State */}
+          <button 
+            onClick={() => playTrack({
+              id: "dark-knight-1",
+              title: "DARK KNIGHT",
+              artist: "WENON BONT",
+              url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Replace with your actual beat URL
+            })}
+            className="flex-1 md:flex-none text-center bg-[#7c3aed] text-white text-[10px] uppercase tracking-widest px-4 py-2 rounded font-bold hover:bg-[#6d28d9] transition-colors flex items-center justify-center gap-2"
+          >
+            {currentTrack?.id === "dark-knight-1" && isPlaying ? "PAUSE AUDIO" : "PLAY AUDIO"}
+          </button>
+
+          <button className="flex-1 md:flex-none text-center border border-white/20 text-white text-[10px] uppercase tracking-widest px-4 py-2 rounded hover:bg-white hover:text-black transition-colors">
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
