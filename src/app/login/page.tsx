@@ -10,23 +10,28 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
-  // THE NUCLEAR REDIRECT LOCK
-  const [redirecting, setRedirecting] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // This fires the absolute millisecond the UI is destroyed
+  // CRITICAL FIX: The Event Listener
+  // This waits for Supabase to finish writing the secure cookie to your browser.
+  // Once the cookie is confirmed saved, it triggers the redirect.
   useEffect(() => {
-    if (redirecting) {
-      setTimeout(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setSuccessMsg("Secure session established. Routing to dashboard...");
+        // Use a hard browser assignment to mimic the Navbar click exactly
         window.location.assign("/dashboard");
-      }, 500);
-    }
-  }, [redirecting]);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,10 +47,13 @@ export default function LoginPage() {
     try {
       if (isResetMode) {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
-        if (error) setErrorMsg(error.message);
-        else setSuccessMsg("Password reset link sent to your email.");
-        setLoading(false);
-        
+        if (error) {
+          setErrorMsg(error.message);
+          setLoading(false);
+        } else {
+          setSuccessMsg("Password reset link sent to your email.");
+          setLoading(false);
+        }
       } else if (isRegister) {
         const confirmPassword = formData.get("confirmPassword") as string;
         if (password !== confirmPassword) {
@@ -58,20 +66,16 @@ export default function LoginPage() {
         if (error) {
           setErrorMsg(error.message.includes("already registered") ? "This email is already registered. Please login." : error.message);
           setLoading(false); 
-        } else {
-          // Trigger the nuclear redirect
-          setRedirecting(true);
-        }
+        } 
+        // Notice we do NOT route here anymore. The useEffect listener above will handle it automatically.
         
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setErrorMsg("Invalid email or password. Please try again.");
           setLoading(false); 
-        } else {
-          // Trigger the nuclear redirect
-          setRedirecting(true);
         }
+        // Notice we do NOT route here anymore. The useEffect listener above will handle it automatically.
       }
     } catch (err) {
       setErrorMsg("A network error occurred. Please check your connection.");
@@ -79,18 +83,6 @@ export default function LoginPage() {
     }
   };
 
-  // IF REDIRECTING: Destroy the form and lock the screen
-  if (redirecting) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a]">
-        <div className="w-12 h-12 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin mb-6" />
-        <h2 className="text-white text-sm font-bold uppercase tracking-widest animate-pulse">Authenticating</h2>
-        <p className="text-[#a1a1aa] text-[10px] uppercase tracking-[0.2em] mt-2">Securing connection to Client Portal...</p>
-      </div>
-    );
-  }
-
-  // STANDARD FORM UI
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 pt-20">
       <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-xl p-8 shadow-2xl">
