@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
@@ -16,23 +16,6 @@ export default function LoginPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // CRITICAL FIX: The Event Listener
-  // This waits for Supabase to finish writing the secure cookie to your browser.
-  // Once the cookie is confirmed saved, it triggers the redirect.
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        setSuccessMsg("Secure session established. Routing to dashboard...");
-        // Use a hard browser assignment to mimic the Navbar click exactly
-        window.location.assign("/dashboard");
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -47,13 +30,10 @@ export default function LoginPage() {
     try {
       if (isResetMode) {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
-        if (error) {
-          setErrorMsg(error.message);
-          setLoading(false);
-        } else {
-          setSuccessMsg("Password reset link sent to your email.");
-          setLoading(false);
-        }
+        if (error) setErrorMsg(error.message);
+        else setSuccessMsg("Password reset link sent to your email.");
+        setLoading(false);
+        
       } else if (isRegister) {
         const confirmPassword = formData.get("confirmPassword") as string;
         if (password !== confirmPassword) {
@@ -66,16 +46,24 @@ export default function LoginPage() {
         if (error) {
           setErrorMsg(error.message.includes("already registered") ? "This email is already registered. Please login." : error.message);
           setLoading(false); 
-        } 
-        // Notice we do NOT route here anymore. The useEffect listener above will handle it automatically.
+        } else {
+          setSuccessMsg("Success! Routing to dashboard...");
+          // Ensure session is locked, then hard route
+          await supabase.auth.getSession();
+          window.location.href = "/dashboard";
+        }
         
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setErrorMsg("Invalid email or password. Please try again.");
           setLoading(false); 
+        } else {
+          setSuccessMsg("Success! Routing to dashboard...");
+          // Ensure session is locked, then hard route
+          await supabase.auth.getSession();
+          window.location.href = "/dashboard";
         }
-        // Notice we do NOT route here anymore. The useEffect listener above will handle it automatically.
       }
     } catch (err) {
       setErrorMsg("A network error occurred. Please check your connection.");
