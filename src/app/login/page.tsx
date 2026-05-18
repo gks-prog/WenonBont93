@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
@@ -9,9 +10,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  
-  // NEW: State to toggle password visibility
   const [showPassword, setShowPassword] = useState(false);
+  
+  const router = useRouter();
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,9 +35,9 @@ export default function LoginPage() {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) setErrorMsg(error.message);
         else setSuccessMsg("Password reset link sent to your email.");
+        setLoading(false);
         
       } else if (isRegister) {
-        // NEW: Confirm Password Validation
         const confirmPassword = formData.get("confirmPassword") as string;
         if (password !== confirmPassword) {
           setErrorMsg("Passwords do not match.");
@@ -51,23 +52,28 @@ export default function LoginPage() {
           } else {
             setErrorMsg(error.message);
           }
+          setLoading(false);
         } else {
-          // FIXED: Hard redirect forces the browser to read the new auth cookie
-          window.location.href = "/dashboard"; 
+          setTimeout(() => {
+            router.push("/dashboard");
+            router.refresh();
+          }, 500);
         }
         
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setErrorMsg("Invalid email or password. Please try again.");
+          setLoading(false);
         } else {
-          // FIXED: Hard redirect
-          window.location.href = "/dashboard";
+          setTimeout(() => {
+            router.push("/dashboard");
+            router.refresh();
+          }, 500);
         }
       }
     } catch (err) {
       setErrorMsg("A network error occurred. Please check your connection.");
-    } finally {
       setLoading(false);
     }
   };
@@ -120,7 +126,6 @@ export default function LoginPage() {
                   className="w-full bg-black/50 border border-white/10 text-white px-4 py-3 rounded outline-none focus:border-[#7c3aed] transition-colors text-sm pr-12"
                   placeholder="••••••••"
                 />
-                {/* NEW: Eye Icon Toggle */}
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -136,7 +141,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* NEW: Confirm Password for Registration Only */}
           {isRegister && !isResetMode && (
             <div className="flex flex-col gap-2">
               <label className="text-white text-[10px] uppercase tracking-widest font-bold">Confirm Password</label>
