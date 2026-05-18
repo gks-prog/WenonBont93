@@ -1,59 +1,56 @@
 "use client";
 
-import { useStore } from "@/lib/store/useStore";
+import { SamplePackPreview } from "@/components/ui/SamplePackPreview";
+import { useParams } from "next/navigation";
 
-const PACKS = [
-  { id: "p1", title: "CHROMA", type: "Pack", price: "$29.99", tags: ["100 Loops", "MIDI Included", "100% Royalty Free"], desc: "High-fidelity analog synth loops processed through vintage tape machines.", img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800" },
-  { id: "p2", title: "DRAIN", type: "Pack", price: "$19.99", tags: ["50 808s", "Perc Loops", "WAV Format"], desc: "Industry-standard drum sounds synthesized for maximum transient punch.", img: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800" },
-];
-
-export default function SamplePacksPage() {
-  const { addToCart } = useStore();
+export default function SinglePackPage() {
+  // This grabs the URL parameter (e.g., "dark-knight") so you know which pack to load from your database later
+  const params = useParams(); 
+  const packId = params.id as string;
 
   return (
-    <main className="pt-32 pb-20 bg-[#0a0a0a] min-h-screen px-[clamp(1.5rem,5vw,3rem)]">
-      <div className="max-w-[1440px] mx-auto">
-        <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-20 border-b border-white/10 pb-10">SAMPLE<br/><span className="text-[#a1a1aa]">ARCHIVE.</span></h1>
+    <div className="min-h-screen bg-[#0a0a0a] pt-24 px-4 pb-12">
+      <div className="max-w-6xl mx-auto">
         
-        <div className="flex flex-col gap-12">
-          {PACKS.map(pack => (
-            <div key={pack.id} className="group relative flex flex-col md:flex-row gap-8 lg:gap-16 bg-[#050505] border border-white/5 hover:border-white/10 rounded-sm p-6 lg:p-10 transition-all duration-500">
-              <div className="w-full md:w-80 lg:w-96 aspect-square rounded-sm overflow-hidden border border-white/10 bg-[#111111] flex-shrink-0 relative">
-                <img src={pack.img} alt={pack.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-90 group-hover:opacity-100" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              </div>
-              
-              <div className="flex-1 flex flex-col justify-center">
-                <div className="mb-6">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-2">
-                    <h3 className="text-4xl lg:text-6xl font-bold text-white tracking-tighter">{pack.title}</h3>
-                    <span className="text-2xl font-bold text-white bg-white/5 px-6 py-2 rounded-sm border border-white/10">{pack.price}</span>
-                  </div>
-                  <p className="text-[#7c3aed] text-xs tracking-[0.3em] uppercase font-bold mb-6">{pack.type}</p>
-                  <p className="text-[#a1a1aa] text-sm leading-relaxed max-w-2xl mb-8">{pack.desc}</p>
-                  
-                  <div className="flex flex-wrap gap-3 mb-10">
-                    {pack.tags.map(tag => (
-                      <span key={tag} className="text-[10px] font-bold tracking-widest text-[#a1a1aa] border border-white/10 bg-[#111111] px-4 py-2 rounded-sm uppercase">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="mt-auto">
-                 <button 
-  onClick={() => addToCart({ id: pack.id, title: pack.title, price: pack.price, image: pack.img, type: 'Pack' })}
-  className="w-full md:w-auto px-12 py-5 bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-[#7c3aed] hover:text-white transition-all rounded-sm shadow-[0_0_20px_rgba(255,255,255,0.1)]"
->
-  Add to Arsenal
-</button>
-                </div>
-              </div>
+        {/* Breadcrumb Navigation */}
+        <div className="mb-8 border-b border-white/10 pb-6">
+          <a href="/sample-packs" className="text-[#a1a1aa] text-[10px] uppercase tracking-widest hover:text-white transition-colors">
+            ← Back to Marketplace
+          </a>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-12 items-start">
+          
+          {/* LEFT SIDE: Pack Details */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6 sticky top-24">
+            <div className="aspect-square bg-[#111] border border-white/10 rounded-xl flex items-center justify-center shadow-2xl">
+              <span className="text-[#7c3aed] text-sm font-bold tracking-widest uppercase">
+                {/* Dynamically display the ID for now */}
+                {packId.replace("-", " ")} 
+              </span>
             </div>
-          ))}
+            
+            <div>
+              <h2 className="text-2xl font-bold text-white uppercase tracking-widest">{packId.replace("-", " ")}</h2>
+              <p className="text-[#7c3aed] text-lg font-bold mt-2">$29.99</p>
+              <p className="text-[#a1a1aa] mt-4 text-sm leading-relaxed">
+                Premium audio assets ready for industry standard production. High-fidelity WAV format.
+              </p>
+            </div>
+            
+            <button className="w-full bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold py-4 rounded hover:bg-[#7c3aed] hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+              Add to Cart
+            </button>
+          </div>
+
+          {/* RIGHT SIDE: The Audio Preview Engine */}
+          <div className="w-full lg:w-2/3">
+            {/* The Preview Component mounts here! */}
+            <SamplePackPreview />
+          </div>
+
         </div>
       </div>
-    </main>
+    </div>
   );
 }
