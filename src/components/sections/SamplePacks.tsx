@@ -1,5 +1,59 @@
 "use client";
 
+// 1. Import the component we just built
+import { SamplePackPreview } from "@/components/ui/SamplePackPreview";
+
+export default function SamplePacksPage() {
+  // (Keep whatever existing state or hooks you have here)
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] pt-24 px-4 pb-12">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Page Header */}
+        <div className="mb-12 border-b border-white/10 pb-6">
+          <h1 className="text-3xl font-bold text-white uppercase tracking-widest">Sample Packs</h1>
+          <p className="text-[#a1a1aa] text-xs uppercase tracking-[0.2em] mt-2">Premium Audio Assets for Production</p>
+        </div>
+
+        {/* Product Container */}
+        <div className="flex flex-col lg:flex-row gap-12 items-start">
+          
+          {/* LEFT SIDE: Product Image & Buying Info */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6 sticky top-24">
+            {/* Replace with your actual cover art image */}
+            <div className="aspect-square bg-[#111] border border-white/10 rounded-xl flex items-center justify-center shadow-2xl">
+              <span className="text-[#7c3aed] text-sm font-bold tracking-widest uppercase">Dark Knight Vol. 1</span>
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-bold text-white uppercase tracking-widest">DARK KNIGHT DRUM KIT</h2>
+              <p className="text-[#7c3aed] text-lg font-bold mt-2">$29.99</p>
+              <p className="text-[#a1a1aa] mt-4 text-sm leading-relaxed">
+                Over 150+ industry standard 808s, claps, snares, and hi-hats. 
+                Designed for dark trap and drill production. High-fidelity WAV format.
+              </p>
+            </div>
+            
+            {/* Your Add to Cart Button */}
+            <button className="w-full bg-white text-black text-[10px] tracking-[0.3em] uppercase font-bold py-4 rounded hover:bg-[#7c3aed] hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+              Add to Cart
+            </button>
+          </div>
+
+          {/* RIGHT SIDE: The Audio Preview Engine */}
+          <div className="w-full lg:w-2/3">
+            {/* 2. Drop the component here. 
+                It will automatically connect to your Global Player when a user clicks play. */}
+            <SamplePackPreview />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 import { useStore } from "@/lib/store/useStore";
 
 const PACKS = [
