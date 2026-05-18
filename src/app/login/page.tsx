@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
 export default function LoginPage() {
@@ -11,8 +10,6 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const router = useRouter();
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,22 +49,22 @@ export default function LoginPage() {
           } else {
             setErrorMsg(error.message);
           }
-          setLoading(false);
+          setLoading(false); // Only unlock on failure
         } else {
           setSuccessMsg("Success! Routing to dashboard...");
-          router.push("/dashboard");
-          setLoading(false); // Unlock the button
+          // CRITICAL: Do NOT set loading to false. Let the UI freeze.
+          window.location.assign("/dashboard"); 
         }
         
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setErrorMsg("Invalid email or password. Please try again.");
-          setLoading(false);
+          setLoading(false); // Only unlock on failure
         } else {
           setSuccessMsg("Success! Routing to dashboard...");
-          router.push("/dashboard");
-          setLoading(false); // Unlock the button
+          // CRITICAL: Hard browser redirect.
+          window.location.assign("/dashboard"); 
         }
       }
     } catch (err) {
